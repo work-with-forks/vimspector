@@ -21,6 +21,7 @@ import shlex
 import subprocess
 import functools
 import vim
+import time
 
 from vimspector import ( breakpoints,
                          code,
@@ -1019,6 +1020,9 @@ class DebugSession( object ):
       self._PrepareLaunch( self._configuration.get( 'remote-cmdLine', [] ),
                            adapter_config,
                            launch_config )
+
+    # Sleep for a little bit... just in case
+    time.sleep( 0.75 )
 
     # FIXME: name is mandatory. Forcefully add it (we should really use the
     # _actual_ name, but that isn't actually remembered at this point)
