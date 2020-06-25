@@ -1022,7 +1022,7 @@ class DebugSession( object ):
                            launch_config )
 
     # Sleep for a little bit... just in case
-    time.sleep( 0.75 )
+    time.sleep( 2 )
 
     # FIXME: name is mandatory. Forcefully add it (we should really use the
     # _actual_ name, but that isn't actually remembered at this point)
