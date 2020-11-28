@@ -91,10 +91,16 @@ class DebugSession( object ):
       if not launch_config_file or not os.path.exists( launch_config_file ):
         continue
 
-      with open( launch_config_file, 'r' ) as f:
-        database = json.loads( minify( f.read() ) )
-        if database:
-          configurations.update( database.get( 'configurations' or {} ) )
+      try:
+        with open( launch_config_file, 'r' ) as f:
+          database = json.loads( minify( f.read() ) )
+          if database:
+            configurations.update( database.get( 'configurations' or {} ) )
+      except json.JSONDecodeError as e:
+        self._logger.exception( f"Unable to read { launch_config_file }" )
+        utils.UserMessage( f"Unable to read { launch_config_file }: { e }",
+                           error = True,
+                           persist = True )
 
     return launch_config_file, configurations
 
@@ -114,9 +120,11 @@ class DebugSession( object ):
     adapters = {}
 
     if not configurations:
-      utils.UserMessage( 'Unable to find any debug configurations. '
+      utils.UserMessage( 'Unable to find any valid debug configurations. '
                          'You need to tell vimspector how to launch your '
-                         'application.' )
+                         'application. See :messages for any errors.',
+                         persist = True,
+                         error = True )
       return
 
     glob.glob( install.GetGadgetDir( VIMSPECTOR_HOME ) )
@@ -126,9 +134,15 @@ class DebugSession( object ):
       if not gadget_config_file or not os.path.exists( gadget_config_file ):
         continue
 
-      with open( gadget_config_file, 'r' ) as f:
-        a =  json.loads( minify( f.read() ) ).get( 'adapters' ) or {}
-        adapters.update( a )
+      try:
+        with open( gadget_config_file, 'r' ) as f:
+          a =  json.loads( minify( f.read() ) ).get( 'adapters' ) or {}
+          adapters.update( a )
+      except json.JSONDecodeError as e:
+        self._logger.exception( f'Unable to read { gadget_config_file }' )
+        utils.UserMessage( f"Unable to read { gadget_config_file }: { e }",
+                           error = True,
+                           persist = True )
 
     if 'configuration' in launch_variables:
       configuration_name = launch_variables.pop( 'configuration' )
